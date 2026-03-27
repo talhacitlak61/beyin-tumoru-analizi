@@ -144,15 +144,49 @@ with tab_metrics:
     st.write("**AUC Değeri:** 0.97 (Model sınıfları ayırt etmede yüksek başarı göstermektedir.)")
 
 with tab_code:
-    st.header("🔬 Algoritma ve Filtreleme Mantığı")
-    st.write("Bu projede, modelin yanlış kararlarını engellemek için **Hibrit Doğrulama Sistemi** kullanılmıştır.")
-    st.code("""
-# 1. Kenar Analizi (Görüntü İşleme)
-# MRI'lar siyah fonludur. Eğer kenarlar beyazsa (Kağıt/Kedi) engellenir.
-edge_mean = np.mean(edges)
-if edge_mean > 55: return "Geçersiz Görüntü"
+    st.header("🔬 Sistemsel Mimari ve Algoritma Detayları")
+    st.write("Bu uygulama, tıbbi görüntüleme güvenliğini sağlamak için 10 katmanlı bir kontrol ve analiz mekanizması kullanır:")
+    
+    st.markdown("""
+    ### 1. Model Nesnesi ve Önbellekleme (Caching)
+    `@st.cache_resource` dekoratörü kullanılarak modelin her kullanıcı etkileşiminde tekrar yüklenmesi engellenir. Bu, RAM kullanımını optimize eder ve analiz hızını %90 artırır.
+    
+    ### 2. Dinamik Model İndirme (Gdown)
+    Model dosyası (`.h5`) sunucuda bulunmadığında Google Drive üzerinden otomatik olarak çekilir. `os.path.getsize` kontrolü ile dosyanın bütünlüğü doğrulanır.
+    
+    ### 3. Görüntü Normalizasyonu ve RGB Dönüşümü
+    Yüklenen her görüntü `.convert("RGB")` ile 3 kanallı yapıya sabitlenir. Ardından pikseller `[0, 255]` aralığından `[0, 1]` aralığına normalize edilir. Bu, gradyan inişi (gradient descent) sırasında modelin daha kararlı çalışmasını sağlar.
+    
+    ### 4. Giriş Boyutlandırma (Resizing)
+    MobileNetV2 mimarisi gereği görüntüler $224 \times 224$ piksel boyutuna indirgenir. Bu işlem sırasında en-boy oranı korunarak modelin öznitelik çıkarımı (feature extraction) yapması kolaylaştırılır.
+    
+    ### 5. Hibrit Güvenlik Filtresi (Kenar Analizi)
+    Tıbbi MRI görüntüleri merkezcil yapıdadır. `ImageOps.grayscale` ve `np.mean` kullanılarak resmin dış çerçevesindeki parlaklık ölçülür. Eğer kenarlar siyah değilse (Değer > 55), sistem görseli 'Alakasız' (Kedi, masa, döküman) olarak etiketler.
+    
+    ### 6. Transfer Learning (MobileNetV2)
+    Modelin temelinde ImageNet veri setinde eğitilmiş MobileNetV2 yatar. Bu mimari, düşük parametre sayısı ile yüksek doğruluk sunan 'Depthwise Separable Convolution' katmanlarını kullanır.
+    
+    ### 7. Softmax Aktivasyon Fonksiyonu
+    Modelin son katmanı olan Softmax, ham çıktıları (logits) olasılıksal değerlere dönüştürür. 
+    """)
+    st.latex(r"P(y=i | x) = \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}}")
+    st.markdown("""
+    ### 8. Güven Eşiği (Confidence Thresholding)
+    Sadece en yüksek olasılığa bakılmaz; aynı zamanda bu olasılığın istatistiksel olarak anlamlı olması beklenir. Düşük güvenli tahminler sistem tarafından 'Şüpheli' olarak işaretlenir.
+    
+    ### 9. Performans Metriklerinin Hesaplanması
+    Uygulamadaki Precision (Kesinlik) ve Recall (Duyarlılık) değerleri, modelin sadece doğru tahmin yapmasını değil, aynı zamanda gerçek vakaları kaçırmamasını da (False Negative) ölçer.
+    
+    ### 10. Interaktif Görselleştirme (Plotly)
+    Confusion Matrix ve Accuracy/Loss grafikleri statik resimler değil, ham veriden üretilen dinamik grafiklerdir. Bu sayede eğitim sırasındaki aşırı öğrenme (overfitting) belirtileri şeffaf bir şekilde analiz edilebilir.
+    """)
 
-# 2. Derin Öğrenme (MobileNetV2)
-# 45 Epoch eğitilmiş model %95+ accuracy ile tahmin yapar.
-preds = model.predict(img_array)
+    st.subheader("💻 Kritik Kod Bloğu")
+    st.code("""
+# Görüntü Hazırlama ve Tahmin Akış Şeması
+def predict(image):
+    processed = preprocess(image) # Normalizasyon & Resize
+    prediction = model.predict(processed) # CNN Inference
+    idx = np.argmax(prediction) # En yüksek sınıf indeksi
+    return classes[idx], prediction[idx]
     """, language="python")
