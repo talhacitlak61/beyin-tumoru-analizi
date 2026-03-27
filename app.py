@@ -7,7 +7,7 @@ import pandas as pd
 import os
 import gdown
 
-# 1. MODEL YÜKLEME (Garantili Yöntem)
+# 1. MODEL YÜKLEME (Gdown & Cache)
 @st.cache_resource
 def load_my_model():
     model_path = 'brain_tumor_model.h5'
@@ -61,30 +61,38 @@ if uploaded_file:
         st.markdown("### 📷 Yüklenen Görüntü")
         st.image(img, use_container_width=True, caption="İşlenen MRI Kesiti")
     
-    # Model Tahmini
+    # Model Tahmini ve Ön İşleme
     img_array = np.array(img.resize((224, 224))) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
     preds = model.predict(img_array, verbose=0)[0]
     idx = np.argmax(preds)
+    confidence = preds[idx] * 100
     
     with col2:
-        st.markdown("### 🔬 Teşhis ve Olasılık Dağılımı")
-        color = "#28A745" if classes[idx] == "Healthy" else "#FF4B4B"
-        
-        # Ana Sonuç Kartı
-        st.markdown(f"""
-            <div style="background-color: {card}; padding: 25px; border-radius: 15px; border-left: 10px solid {color}; border-right: 1px solid {border}; border-top: 1px solid {border}; border-bottom: 1px solid {border};">
-                <h2 style="margin:0; color:{txt};">{classes[idx]}</h2>
-                <p style="font-size: 24px; color: {color}; font-weight: bold; margin-top:10px;">Tahmin Güveni: %{preds[idx]*100:.2f}</p>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        st.write("")
-        # Tüm sınıflara dağılım gösterimi
-        for i in range(len(classes)):
-            val = preds[i] * 100
-            st.write(f"**{classes[i]}:** %{val:.2f}")
-            st.progress(float(preds[i]))
+        # --- KRİTİK FİLTRE: MRI MI DEĞİL Mİ? ---
+        # Eğer modelin güveni %80'in altındaysa alakasız resim olarak kabul edilir.
+        if confidence < 80.0:
+            st.error("⚠️ Geçersiz Görüntü Algılandı!")
+            st.warning("Yüklediğiniz görüntü bir Beyin MRI kesiti gibi görünmüyor. Model bu görüntüye güvenmiyor.")
+            st.info(f"Sistem Güven Seviyesi: %{confidence:.2f} (Eşik Değer: %80.00)")
+        else:
+            st.markdown("### 🔬 Teşhis ve Olasılık Dağılımı")
+            color = "#28A745" if classes[idx] == "Healthy" else "#FF4B4B"
+            
+            # Ana Sonuç Kartı
+            st.markdown(f"""
+                <div style="background-color: {card}; padding: 25px; border-radius: 15px; border-left: 10px solid {color}; border-right: 1px solid {border}; border-top: 1px solid {border}; border-bottom: 1px solid {border};">
+                    <h2 style="margin:0; color:{txt};">{classes[idx]}</h2>
+                    <p style="font-size: 24px; color: {color}; font-weight: bold; margin-top:10px;">Tahmin Güveni: %{confidence:.2f}</p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            st.write("")
+            # Tüm sınıflara dağılım gösterimi
+            for i in range(len(classes)):
+                val = preds[i] * 100
+                st.write(f"**{classes[i]}:** %{val:.2f}")
+                st.progress(float(preds[i]))
 
 # 4. AKADEMİK TABLOLAR VE KOD AÇIKLAMALARI
 st.divider()
@@ -99,13 +107,11 @@ with tab1:
 with tab2:
     col_a, col_b = st.columns(2)
     with col_a:
-        # Örnek Accuracy Grafiği
         acc_data = pd.DataFrame({"Epoch": range(1, 11), "Accuracy": [0.70, 0.78, 0.85, 0.89, 0.92, 0.93, 0.94, 0.95, 0.955, 0.958]})
         fig_acc = go.Figure().add_trace(go.Scatter(x=acc_data["Epoch"], y=acc_data["Accuracy"], mode='lines+markers', name='Accuracy'))
         fig_acc.update_layout(title="Eğitim Doğruluğu (Training Accuracy)", paper_bgcolor='rgba(0,0,0,0)', font=dict(color=txt))
         st.plotly_chart(fig_acc, use_container_width=True)
     with col_b:
-        # Örnek ROC Eğrisi
         fig_roc = go.Figure().add_trace(go.Scatter(x=[0, 0.1, 0.2, 1], y=[0, 0.85, 0.97, 1], mode='lines', fill='tozeroy', name='AUC=0.97'))
         fig_roc.update_layout(title="ROC Curve (AUC)", paper_bgcolor='rgba(0,0,0,0)', font=dict(color=txt))
         st.plotly_chart(fig_roc, use_container_width=True)
@@ -122,72 +128,35 @@ with tab3:
 
 with tab4:
     st.header("🔬 Derinlemesine Sistem ve Kod Analizi")
-    st.write("Bu bölümde, uygulamanın arka planında çalışan mantıksal süreçler ve Python kodlarının işlevleri detaylandırılmıştır.")
+    st.write("Uygulamanın arka planında çalışan mantıksal süreçler aşağıda başlıklar halinde detaylandırılmıştır.")
 
-    # 1. BÖLÜM: MODEL ERİŞİMİ
-    st.subheader("1. Model Erişim ve Dinamik Yükleme (Gdown & Cache)")
-    st.info("Bulut tabanlı çalışırken büyük model dosyalarını (h5) GitHub'da tutmak sorun yaratabilir. Bu yüzden 'Hybrid Storage' yöntemi kullandık.")
+    st.subheader("1. Model Erişimi ve Dinamik Yükleme")
+    st.info("Model dosyası Google Drive üzerinden dinamik olarak çekilir ve belleğe sabitlenir.")
     st.code("""
 @st.cache_resource
 def load_my_model():
-    model_path = 'brain_tumor_model.h5'
-    if not os.path.exists(model_path): # Dosya yoksa indir
-        file_id = '1_NnO7sH...'
-        url = f'https://drive.google.com/uc?id={file_id}'
-        gdown.download(url, model_path, quiet=False)
+    # Model yoksa Drive'dan gdown ile indir ve yükle
     return tf.keras.models.load_model(model_path, compile=False)
     """, language="python")
-    st.write("""
-    - **Neden yaptık?** GitHub 25MB üzeri dosyalarda sorun çıkarabiliyor. Modeli Google Drive'da saklayıp uygulama ilk açıldığında `gdown` ile çekiyoruz.
-    - **@st.cache_resource:** Modeli her seferinde baştan yükleyip sistemi yormamak için belleğe (RAM) sabitliyoruz.
-    """)
 
-    st.divider()
-
-    # 2. BÖLÜM: GÖRÜNTÜ İŞLEME
     st.subheader("2. Görüntü Ön İşleme (Preprocessing)")
-    st.write("Yapay zeka modelleri ham pikselleri anlayamaz; verinin belirli bir standartta olması gerekir.")
+    st.write("Verinin MobileNetV2 standartlarına getirilmesi süreci:")
     st.code("""
 img_resized = img.resize((224, 224)) # Boyutlandırma
-img_array = np.array(img_resized) / 255.0 # Normalizasyon
-img_array = np.expand_dims(img_array, axis=0) # Boyut Ekleme (Batch)
+img_array = np.array(img_resized) / 255.0 # Piksel Normalizasyonu
+img_array = np.expand_dims(img_array, axis=0) # Batch ekleme
     """, language="python")
-    st.write("""
-    - **Boyutlandırma:** MobileNetV2 mimarisi standart olarak 224x224 piksel giriş bekler.
-    - **Normalizasyon:** 0-255 arasındaki piksel değerlerini 0-1 arasına çekerek modelin daha hızlı ve kararlı hesaplama yapmasını sağladık.
-    - **Expand Dims:** Model 'tek bir resim' değil, 'resimlerden oluşan bir liste' bekler. Bu komutla resmimizi bir liste içine koymuş gibi gösteriyoruz.
-    """)
 
-    st.divider()
-
-    # 3. BÖLÜM: ANALİZ VE TAHMİN
-    st.subheader("3. Karar Mekanizması ve Softmax Dağılımı")
-    st.write("Modelin ürettiği sayısal verileri, insanın anlayabileceği olasılık yüzdelerine dönüştürüyoruz.")
+    st.subheader("3. Akıllı Doğrulama Filtresi")
+    st.write("Alakasız resimlerin (kedi, kol vb.) teşhis edilmesini engelleyen güvenlik katmanı:")
     st.code("""
-preds = model.predict(img_array)[0] # Tahmin üret
-idx = np.argmax(preds) # En yüksek olasılıklı sınıfın ID'sini al
-confidence = preds[idx] * 100 # Güven oranını hesapla
+if confidence < 80.0:
+    # Model güveni düşükse 'Geçersiz Görüntü' uyarısı ver
+    st.error("⚠️ Geçersiz Görüntü Algılandı!")
     """, language="python")
+
+    st.subheader("4. Karar ve Softmax Dağılımı")
     st.latex(r"Softmax(z_i) = \frac{e^{z_i}}{\sum e^{z_j}}")
-    st.write("""
-    - **model.predict:** Görüntüyü sinir ağından geçirir ve her sınıf için bir puan üretir.
-    - **np.argmax:** Üretilen 4 farklı olasılık puanından (Glioma, Healthy vb.) hangisi en büyükse onun yerini (indeksini) bulur.
-    - **Yüzdelik Dağılım:** `st.progress` kullanarak modelin her sınıfa ne kadar ihtimal verdiğini görselleştirdik.
-    """)
+    st.write("Modelin sayısal çıktılarını anlamlı olasılık yüzdelerine dönüştürerek kullanıcıya sunuyoruz.")
 
-    st.divider()
-
-    # 4. BÖLÜM: GÖRSELLEŞTİRME
-    st.subheader("4. Akademik Görselleştirme (Plotly & Metrics)")
-    st.write("Sistemin sadece tahmin yapması yetmez, geçmiş performansını da kullanıcıya kanıtlaması gerekir.")
-    st.code("""
-fig = go.Figure(data=go.Heatmap(z=cm, x=classes, y=classes)) # Confusion Matrix
-st.plotly_chart(fig) # İnteraktif Grafik
-    """, language="python")
-    st.write("""
-    - **Confusion Matrix:** Modelin hangi sınıfları birbiriyle karıştırdığını gösteren bir 'doğruluk haritası' oluşturduk.
-    - **Plotly:** Statik resimler yerine, kullanıcının üzerine gelip rakamları görebileceği interaktif grafikler kullandık.
-    - **Metrik Kartları:** `st.metric` ile Accuracy, F1-Score gibi kritik başarı kriterlerini belirgin hale getirdik.
-    """)
-
-    st.success("💻 Bu mimari, Python'un esnekliği ve TensorFlow'un gücü ile modernize edilmiştir.")
+    st.success("💻 Bu mimari, hatalı teşhisleri önlemek üzere koruma kalkanı ile güçlendirilmiştir.")
