@@ -121,20 +121,73 @@ with tab3:
     st.table(metrics_df)
 
 with tab4:
-    st.header("👨‍💻 Algoritma ve Mimari Detayları")
-    st.info("Sistem, MobileNetV2 tabanlı Transfer Learning mimarisini kullanmaktadır.")
-    
-    st.subheader("1. Görüntü Ön İşleme")
+    st.header("🔬 Derinlemesine Sistem ve Kod Analizi")
+    st.write("Bu bölümde, uygulamanın arka planında çalışan mantıksal süreçler ve Python kodlarının işlevleri detaylandırılmıştır.")
+
+    # 1. BÖLÜM: MODEL ERİŞİMİ
+    st.subheader("1. Model Erişim ve Dinamik Yükleme (Gdown & Cache)")
+    st.info("Bulut tabanlı çalışırken büyük model dosyalarını (h5) GitHub'da tutmak sorun yaratabilir. Bu yüzden 'Hybrid Storage' yöntemi kullandık.")
     st.code("""
-# Görüntü 224x224 boyutuna getirilir ve normalize edilir
-img_array = np.array(img.resize((224, 224))) / 255.0
-img_array = np.expand_dims(img_array, axis=0) # Batch boyutu ekleme
+@st.cache_resource
+def load_my_model():
+    model_path = 'brain_tumor_model.h5'
+    if not os.path.exists(model_path): # Dosya yoksa indir
+        file_id = '1_NnO7sH...'
+        url = f'https://drive.google.com/uc?id={file_id}'
+        gdown.download(url, model_path, quiet=False)
+    return tf.keras.models.load_model(model_path, compile=False)
     """, language="python")
-    
-    st.subheader("2. Model Yükleme (Safe-Loading)")
-    st.write("Model, versiyon uyuşmazlığını önlemek için 'compile=False' parametresiyle yüklenir.")
-    st.code("model = tf.keras.models.load_model('brain_tumor_model.h5', compile=False)", language="python")
-    
-    st.subheader("3. Olasılık Hesaplama")
-    st.write("Son katmandaki 'Softmax' aktivasyonu sayesinde tüm sınıfların toplamı %100 olacak şekilde dağıtılır.")
-    st.latex(r"P(y=i | x) = \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}}")
+    st.write("""
+    - **Neden yaptık?** GitHub 25MB üzeri dosyalarda sorun çıkarabiliyor. Modeli Google Drive'da saklayıp uygulama ilk açıldığında `gdown` ile çekiyoruz.
+    - **@st.cache_resource:** Modeli her seferinde baştan yükleyip sistemi yormamak için belleğe (RAM) sabitliyoruz.
+    """)
+
+    st.divider()
+
+    # 2. BÖLÜM: GÖRÜNTÜ İŞLEME
+    st.subheader("2. Görüntü Ön İşleme (Preprocessing)")
+    st.write("Yapay zeka modelleri ham pikselleri anlayamaz; verinin belirli bir standartta olması gerekir.")
+    st.code("""
+img_resized = img.resize((224, 224)) # Boyutlandırma
+img_array = np.array(img_resized) / 255.0 # Normalizasyon
+img_array = np.expand_dims(img_array, axis=0) # Boyut Ekleme (Batch)
+    """, language="python")
+    st.write("""
+    - **Boyutlandırma:** MobileNetV2 mimarisi standart olarak 224x224 piksel giriş bekler.
+    - **Normalizasyon:** 0-255 arasındaki piksel değerlerini 0-1 arasına çekerek modelin daha hızlı ve kararlı hesaplama yapmasını sağladık.
+    - **Expand Dims:** Model 'tek bir resim' değil, 'resimlerden oluşan bir liste' bekler. Bu komutla resmimizi bir liste içine koymuş gibi gösteriyoruz.
+    """)
+
+    st.divider()
+
+    # 3. BÖLÜM: ANALİZ VE TAHMİN
+    st.subheader("3. Karar Mekanizması ve Softmax Dağılımı")
+    st.write("Modelin ürettiği sayısal verileri, insanın anlayabileceği olasılık yüzdelerine dönüştürüyoruz.")
+    st.code("""
+preds = model.predict(img_array)[0] # Tahmin üret
+idx = np.argmax(preds) # En yüksek olasılıklı sınıfın ID'sini al
+confidence = preds[idx] * 100 # Güven oranını hesapla
+    """, language="python")
+    st.latex(r"Softmax(z_i) = \frac{e^{z_i}}{\sum e^{z_j}}")
+    st.write("""
+    - **model.predict:** Görüntüyü sinir ağından geçirir ve her sınıf için bir puan üretir.
+    - **np.argmax:** Üretilen 4 farklı olasılık puanından (Glioma, Healthy vb.) hangisi en büyükse onun yerini (indeksini) bulur.
+    - **Yüzdelik Dağılım:** `st.progress` kullanarak modelin her sınıfa ne kadar ihtimal verdiğini görselleştirdik.
+    """)
+
+    st.divider()
+
+    # 4. BÖLÜM: GÖRSELLEŞTİRME
+    st.subheader("4. Akademik Görselleştirme (Plotly & Metrics)")
+    st.write("Sistemin sadece tahmin yapması yetmez, geçmiş performansını da kullanıcıya kanıtlaması gerekir.")
+    st.code("""
+fig = go.Figure(data=go.Heatmap(z=cm, x=classes, y=classes)) # Confusion Matrix
+st.plotly_chart(fig) # İnteraktif Grafik
+    """, language="python")
+    st.write("""
+    - **Confusion Matrix:** Modelin hangi sınıfları birbiriyle karıştırdığını gösteren bir 'doğruluk haritası' oluşturduk.
+    - **Plotly:** Statik resimler yerine, kullanıcının üzerine gelip rakamları görebileceği interaktif grafikler kullandık.
+    - **Metrik Kartları:** `st.metric` ile Accuracy, F1-Score gibi kritik başarı kriterlerini belirgin hale getirdik.
+    """)
+
+    st.success("💻 Bu mimari, Python'un esnekliği ve TensorFlow'un gücü ile modernize edilmiştir.")
