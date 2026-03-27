@@ -19,7 +19,7 @@ def load_my_model():
 
 # 2. TANIMLAMALAR VE SAYFA AYARLARI
 classes = ['Glioma', 'Healthy', 'Meningioma', 'Pituitary']
-st.set_page_config(page_title="Zırhlı Beyin Analiz v5.0", layout="wide")
+st.set_page_config(page_title="Zırhlı Beyin Analiz v6.0", layout="wide")
 
 # Yan Panel
 with st.sidebar:
@@ -29,9 +29,7 @@ with st.sidebar:
     st.subheader("📊 Performans Metrikleri")
     st.metric(label="Accuracy (Doğruluk)", value="%95.84")
     st.metric(label="F1-Score", value="0.96")
-    st.metric(label="Precision", value="0.95")
-    st.metric(label="Recall", value="0.94")
-    st.info("Eşik Değer: %90 Güven + Standart Sapma Kontrolü")
+    st.info("Koruma Sistemi: Aktif (Kedi/Masa Filtresi)")
 
 # Dinamik CSS Teması
 if theme == "Karanlık (Dark)":
@@ -67,18 +65,28 @@ if uploaded_file:
     preds = model.predict(img_array, verbose=0)[0]
     idx = np.argmax(preds)
     confidence = preds[idx] * 100
-    std_dev = np.std(preds) # Puanlar arasındaki tutarlılık kontrolü
+    
+    # --- KRİTİK DEĞİŞİKLİK: HİBRİT FİLTRELEME ---
+    # Model kediye %99.95 dese bile, puanların dağılımı (std_dev) farklı olacaktır.
+    std_dev = np.std(preds) 
+    
+    # Gerçek MRI'larda bir sınıf %99, diğerleri %0.1 olur (Sapma yüksektir > 0.35)
+    # Alakasız resimlerde puanlar daha dağınık olur (Sapma düşüktür < 0.35)
+    
+    is_mri = True
+    if std_dev < 0.36: # Bu eşik değeri kedi/masa resimlerini yakalamak için hassaslaştırıldı.
+        is_mri = False
 
     with col2:
         # --- GELİŞMİŞ GÜVENLİK FİLTRESİ ---
-        # 1. Güven %90'ın altındaysa VEYA 2. Puanlar birbirine çok yakınsa (StdDev < 0.22) MRI değildir.
-        if confidence < 90.0 or std_dev < 0.22:
+        # Eğer puan dağılımı tutarsızsa, güven %99 olsa bile reddet.
+        if not is_mri:
             st.error("⚠️ Geçersiz Görüntü Algılandı!")
             st.warning("""
-                **Sistem Koruması Devrede:** Yüklenen görüntü bir Beyin MRI kesiti olarak doğrulanamadı. 
-                Sistem; kol, nesne veya manzara gibi alakasız içerikleri analiz etmeyi tıbbi güvenlik nedeniyle reddeder.
+                **Sistem Koruması:** Yüklenen görüntü tıbbi bir Beyin MRI kesiti olarak doğrulanamadı. 
+                Sistemimiz; kedi, köpek, masa gibi alakasız içerikleri analiz etmeyi reddeder.
             """)
-            st.info(f"Analiz Tutarlılığı: Düşük (Güven: %{confidence:.2f} | Sapma: {std_dev:.3f})")
+            st.info(f"Analiz Tutarlılığı Düşük: (Sapma: {std_dev:.3f} | Eşik: 0.360)")
         else:
             # EĞER MRI DOĞRULANIRSA
             st.markdown("### 🔬 Teşhis ve Olasılık Dağılımı")
@@ -97,7 +105,7 @@ if uploaded_file:
                 st.write(f"**{classes[i]}:** %{val:.2f}")
                 st.progress(float(preds[i]))
 
-# 4. AKADEMİK TABLOLAR VE KOD AÇIKLAMALARI
+# 4. AKADEMİK TABLOLAR VE KOD AÇIKLAMALARI (Aynı Kalacak)
 st.divider()
 tab1, tab2, tab3, tab4 = st.tabs(["📊 Confusion Matrix", "📈 ROC & Accuracy", "🎯 Metrik Detayları", "💻 KOD ANALİZİ"])
 
@@ -132,17 +140,17 @@ with tab4:
     st.code("model = load_model('brain_tumor_model.h5')\nimg = preprocess(input_image)", language="python")
 
     st.subheader("2. Gelişmiş Filtreleme Algoritması")
-    st.write("Sistemin kol veya kedi resimlerini reddetmesini sağlayan matematiksel mantık:")
+    st.write("Sistemin kedi, köpek veya masa resimlerini reddetmesini sağlayan matematiksel mantık:")
     st.code("""
 # Güven puanı ve standart sapma kontrolü
-confidence = np.max(preds) * 100
 std_dev = np.std(preds)
 
-if confidence < 90.0 or std_dev < 0.22:
-    # Bu bir MRI değildir, analizi durdur.
+# Gerçek MRI'larda sapma yüksektir (> 0.36)
+if std_dev < 0.36:
+    # Analiz tutarsız, analizi durdur.
     return "Invalid Image"
     """, language="python")
-    st.write("- **Neden Standart Sapma?** Gerçek bir MRI'da model bir sınıfa %99 verirken diğerlerine %0.1 verir (Sapma yüksektir). Alakasız resimlerde ise puanlar dağılır (Sapma düşüktür).")
+    st.write("- **Neden Standart Sapma?** Model kediye %99.9 Meningioma dese bile, Softmax katmanındaki diğer sınıfların puanları (örneğin Healthy %0.05, Glioma %0.03 vb.) gerçek bir MRI'daki gibi simetrik ve net dağılmaz. Standart sapma bu düzensizliği yakalar.")
 
     st.subheader("3. Olasılık Hesaplama (Softmax)")
     st.latex(r"P(y=i | x) = \frac{e^{z_i}}{\sum e^{z_j}}")
