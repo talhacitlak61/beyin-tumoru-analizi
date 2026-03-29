@@ -388,6 +388,6 @@ elif selected == "Sonuç & Kaynakça":
 # Footer
 st.markdown("""
     <div style="text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-        <p style="color: #64748B; font-size: 13px;">v16.0 | BİLM-432 Yapay Zeka ile Sağlık Bilişimi • Final Projesi</p>
+        <p style="color: #64748B; font-size: 13px;">v16.0 | BİLM-432 Yapay Zeka ile Sağlık Bilişimi • Vize Projesi</p>
     </div>
 """, unsafe_allow_html=True)
