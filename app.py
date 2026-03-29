@@ -22,82 +22,119 @@ def load_my_model():
     return tf.keras.models.load_model(model_path, compile=False)
 
 classes = ['Glioma', 'Healthy', 'Meningioma', 'Pituitary']
-model = load_my_model()
+# model = load_my_model() # Geliştirme aşamasında modeli yüklemek için yorum satırını kaldırın
 
-# --- 2. CUSTOM CSS (Modern Dashboard Teması - Glassmorphism) ---
-st.markdown("""
+# --- 2. TEMA YÖNETİMİ ---
+if "theme" not in st.session_state:
+    st.session_state.theme = "Dark"
+
+# Tema Renk Paletleri
+if st.session_state.theme == "Dark":
+    c_bg = "#030712"
+    c_text = "#F9FAFB"
+    c_sidebar = "#0B1120"
+    c_card_bg = "rgba(15, 23, 42, 0.6)"
+    c_box_bg = "linear-gradient(145deg, #111827 0%, #0F172A 100%)"
+    c_muted = "#CBD5E1"
+    c_border = "rgba(255,255,255,0.1)"
+    c_table_th = "rgba(30, 41, 59, 0.8)"
+    c_table_hover = "rgba(255,255,255,0.05)"
+    c_grid = "rgba(255,255,255,0.05)"
+else:
+    c_bg = "#F8FAFC"
+    c_text = "#0F172A"
+    c_sidebar = "#FFFFFF"
+    c_card_bg = "rgba(255, 255, 255, 0.7)"
+    c_box_bg = "linear-gradient(145deg, #FFFFFF 0%, #F1F5F9 100%)"
+    c_muted = "#475569"
+    c_border = "rgba(0,0,0,0.1)"
+    c_table_th = "rgba(226, 232, 240, 0.8)"
+    c_table_hover = "rgba(0,0,0,0.03)"
+    c_grid = "rgba(0,0,0,0.05)"
+
+# --- 3. DİNAMİK CUSTOM CSS (Glassmorphism & Modern Tema) ---
+st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
     
-    html, body, [class*="css"]  {
+    html, body, [class*="css"]  {{
         font-family: 'Inter', sans-serif;
-    }
+    }}
     
     /* Ana Arka Plan ve Metin Rengi */
-    .stApp { background-color: #030712; color: #F9FAFB; }
+    .stApp {{ background-color: {c_bg}; color: {c_text}; transition: all 0.3s ease; }}
     
     /* Sidebar Stili */
-    [data-testid="stSidebar"] { background-color: #0B1120 !important; border-right: 1px solid #1F2937; }
+    [data-testid="stSidebar"] {{ background-color: {c_sidebar} !important; border-right: 1px solid {c_border}; }}
     
-    /* Gradient Metin Sınıfı */
-    .gradient-text {
+    /* Metinleri Temaya Göre Zorla */
+    h1, h2, h3, h4, p, li {{ color: {c_text} !important; }}
+    .gradient-text {{
         background: linear-gradient(90deg, #00F2FE 0%, #4FACFE 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 700;
         padding-bottom: 5px;
-    }
+    }}
 
     /* Glassmorphism Metrik Kartları */
-    .metric-card {
-        background: rgba(15, 23, 42, 0.6);
+    .metric-card {{
+        background: {c_card_bg};
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(0, 242, 254, 0.2);
         border-radius: 16px;
         padding: 24px 20px;
         text-align: center;
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
         transition: all 0.3s ease;
         margin-bottom: 20px;
-    }
-    .metric-card:hover { transform: translateY(-5px); border: 1px solid rgba(0, 242, 254, 0.6); box-shadow: 0 8px 32px rgba(0, 242, 254, 0.25); }
-    .metric-title { color: #94A3B8; font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-    .metric-value { color: #00F2FE; font-size: 36px; font-weight: 700; margin-top: 8px; }
+    }}
+    .metric-card:hover {{ transform: translateY(-5px); border: 1px solid rgba(0, 242, 254, 0.6); box-shadow: 0 8px 32px rgba(0, 242, 254, 0.25); }}
+    .metric-title {{ color: {c_muted} !important; font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }}
+    .metric-value {{ color: #00F2FE !important; font-size: 36px; font-weight: 700; margin-top: 8px; }}
     
     /* Bilgi Kutuları */
-    .class-box { 
-        background: linear-gradient(145deg, #111827 0%, #0F172A 100%);
+    .class-box {{ 
+        background: {c_box_bg};
         border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 4px solid; 
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: transform 0.2s;
-    }
-    .class-box:hover { transform: translateX(5px); }
-    .class-box h4 { margin-top: 0; color: #F8FAFC; font-weight: 600; }
-    .class-box p, .class-box ul { margin-bottom: 0; color: #CBD5E1; font-size: 14px; line-height: 1.6; }
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: transform 0.2s;
+        border-right: 1px solid {c_border}; border-top: 1px solid {c_border}; border-bottom: 1px solid {c_border};
+    }}
+    .class-box:hover {{ transform: translateX(5px); }}
+    .class-box h4 {{ margin-top: 0; font-weight: 600; color: {c_text} !important; }}
+    .class-box p, .class-box ul {{ margin-bottom: 0; color: {c_muted} !important; font-size: 14px; line-height: 1.6; }}
     
     /* Buton Stili */
-    div.stButton > button {
-        background: linear-gradient(90deg, #1A2D54 0%, #0A1530 100%); color: white; border: 1px solid #00F2FE;
+    div.stButton > button {{
+        background: linear-gradient(90deg, #1A2D54 0%, #0A1530 100%); color: white !important; border: 1px solid #00F2FE;
         border-radius: 8px; padding: 10px 24px; font-weight: 600; transition: all 0.3s;
-    }
-    div.stButton > button:hover { border-color: #4FACFE; box-shadow: 0 0 15px rgba(0, 242, 254, 0.4); color: #00F2FE; }
+    }}
+    div.stButton > button:hover {{ border-color: #4FACFE; box-shadow: 0 0 15px rgba(0, 242, 254, 0.4); color: #00F2FE !important; }}
     
     /* İlerleme Çubuğu Özelleştirme */
-    .stProgress > div > div > div > div { background-image: linear-gradient(to right, #4FACFE , #00F2FE); }
+    .stProgress > div > div > div > div {{ background-image: linear-gradient(to right, #4FACFE , #00F2FE); }}
     
     /* Custom Table Sınıfı */
-    .custom-table { width: 100%; border-collapse: collapse; margin: 0 auto; background: rgba(15, 23, 42, 0.4); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-    .custom-table th { background: rgba(30, 41, 59, 0.8); color: #00F2FE; padding: 15px; text-align: center; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .custom-table td { color: #F8FAFC; padding: 12px 15px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .custom-table tr:hover { background: rgba(255,255,255,0.05); }
-    .custom-table tr:last-child td { font-weight: bold; color: #10B981; background: rgba(16, 185, 129, 0.05); border-bottom: none; }
+    .custom-table {{ width: 100%; border-collapse: collapse; margin: 0 auto; background: {c_card_bg}; border-radius: 12px; overflow: hidden; border: 1px solid {c_border}; }}
+    .custom-table th {{ background: {c_table_th}; color: #00F2FE !important; padding: 15px; text-align: center; font-weight: 600; border-bottom: 1px solid {c_border}; }}
+    .custom-table td {{ color: {c_text} !important; padding: 12px 15px; text-align: center; border-bottom: 1px solid {c_border}; }}
+    .custom-table tr:hover {{ background: {c_table_hover}; }}
+    .custom-table tr:last-child td {{ font-weight: bold; color: #10B981 !important; background: rgba(16, 185, 129, 0.05); border-bottom: none; }}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. SIDEBAR NAVİGASYON ---
+# --- 4. SIDEBAR NAVİGASYON ---
 with st.sidebar:
-    st.markdown('<div style="text-align: center; margin-bottom: 20px;"><img src="https://img.icons8.com/nolan/96/brain.png" width="90"></div>', unsafe_allow_html=True)
-    st.markdown('<h2 style="text-align: center; color: #F8FAFC; margin-bottom: 30px; font-weight: 700;">Zırhlı Beyin</h2>', unsafe_allow_html=True)
+    st.markdown('<div style="text-align: center; margin-bottom: 10px;"><img src="https://img.icons8.com/nolan/96/brain.png" width="90"></div>', unsafe_allow_html=True)
+    st.markdown('<h2 style="text-align: center; margin-bottom: 20px; font-weight: 700;">Zırhlı Beyin</h2>', unsafe_allow_html=True)
+    
+    # --- Tema Seçici Aracı ---
+    theme_choice = st.radio("Tema Seçimi", ["Dark", "Light"], horizontal=True, index=0 if st.session_state.theme == "Dark" else 1)
+    if theme_choice != st.session_state.theme:
+        st.session_state.theme = theme_choice
+        st.rerun()
+    st.divider()
     
     selected = option_menu(
         menu_title=None,
@@ -107,23 +144,23 @@ with st.sidebar:
         styles={
             "container": {"padding": "0!important", "background-color": "transparent"},
             "icon": {"color": "#4FACFE", "font-size": "18px"}, 
-            "nav-link": {"font-size": "14px", "text-align": "left", "margin":"5px 0", "color": "#CBD5E1", "border-radius": "8px", "padding": "10px 15px"},
+            "nav-link": {"font-size": "14px", "text-align": "left", "margin":"5px 0", "color": c_muted, "border-radius": "8px", "padding": "10px 15px"},
             "nav-link-selected": {"background-color": "rgba(0, 242, 254, 0.1)", "color": "#00F2FE", "border-left": "4px solid #00F2FE", "font-weight": "600"},
         }
     )
     st.divider()
-    st.markdown("""
+    st.markdown(f"""
         <div style="background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 12px; border-radius: 8px; text-align: center;">
             <span style="color: #10B981; font-weight: 600; font-size: 14px;">🟢 Sistem Online</span><br>
-            <span style="color: #94A3B8; font-size: 12px;">Model: MobileNetV2 Yüklendi</span>
+            <span style="color: {c_muted}; font-size: 12px;">Model: MobileNetV2 Yüklendi</span>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 4. SAYFA İÇERİKLERİ ---
+# --- 5. SAYFA İÇERİKLERİ ---
 
 if selected == "Ana Sayfa":
     st.markdown('<h1 class="gradient-text">🧠 Yapay Zeka Destekli Beyin MRI Analiz Portalı</h1>', unsafe_allow_html=True)
-    st.markdown("<p style='color: #94A3B8; font-size: 18px; margin-bottom: 30px;'>Gelişmiş Teşhis ve Performans Dashboard'u</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color: {c_muted}; font-size: 18px; margin-bottom: 30px;'>Gelişmiş Teşhis ve Performans Dashboard'u</p>", unsafe_allow_html=True)
     
     c1, c2, c3, c4 = st.columns(4)
     with c1: st.markdown('<div class="metric-card"><div class="metric-title">Accuracy</div><div class="metric-value">%95.84</div></div>', unsafe_allow_html=True)
@@ -131,7 +168,7 @@ if selected == "Ana Sayfa":
     with c3: st.markdown('<div class="metric-card"><div class="metric-title">Recall</div><div class="metric-value">0.94</div></div>', unsafe_allow_html=True)
     with c4: st.markdown('<div class="metric-card"><div class="metric-title">AUC</div><div class="metric-value">0.97</div></div>', unsafe_allow_html=True)
     
-    st.markdown('<div style="border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); margin-top: 10px;">', unsafe_allow_html=True)
+    st.markdown(f'<div style="border-radius: 16px; overflow: hidden; border: 1px solid {c_border}; margin-top: 10px;">', unsafe_allow_html=True)
     st.image("https://images.unsplash.com/photo-1559757175-5700dde675bc?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80", use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -202,14 +239,14 @@ elif selected == "Model & Parametreler":
             </div>
         ''', unsafe_allow_html=True)
 
-    st.markdown('<div style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin: 20px 0; text-align: center;">', unsafe_allow_html=True)
+    st.markdown(f'<div style="background: {c_card_bg}; padding: 20px; border-radius: 12px; border: 1px solid {c_border}; margin: 20px 0; text-align: center;">', unsafe_allow_html=True)
     st.latex(r"Output = Softmax(Dense(GlobalAveragePooling2D(MobileNetV2(Input))))")
     st.markdown('</div>', unsafe_allow_html=True)
     st.image("https://raw.githubusercontent.com/tensorflow/models/master/research/slim/nets/mobilenet_v2.png", use_container_width=True)
 
 elif selected == "Analiz Motoru":
     st.markdown('<h2 class="gradient-text">🔬 MRI Analiz ve Teşhis Motoru</h2>', unsafe_allow_html=True)
-    st.markdown("<p style='color: #94A3B8; margin-bottom: 20px;'>Lütfen analiz edilecek tıbbi kesiti sisteme yükleyin.</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color: {c_muted}; margin-bottom: 20px;'>Lütfen analiz edilecek tıbbi kesiti sisteme yükleyin.</p>", unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader("", type=["jpg", "png", "jpeg"])
 
@@ -250,10 +287,10 @@ elif selected == "Analiz Motoru":
                     glow = "rgba(16, 185, 129, 0.4)" if classes[idx] == "Healthy" else "rgba(239, 68, 68, 0.4)"
 
                 st.markdown(f"""
-                    <div style="background: linear-gradient(145deg, #111827 0%, #0F172A 100%); 
+                    <div style="background: {c_box_bg}; 
                                 padding: 25px; border-radius: 16px; border: 1px solid {box_color}; box-shadow: 0 0 20px {glow}; text-align: center; margin-bottom: 25px;">
-                        <p style="color: #94A3B8; font-size: 14px; text-transform: uppercase; margin-bottom: 5px;">Birincil Teşhis</p>
-                        <h1 style="margin:0; color: #F8FAFC; font-size: 38px;">{classes[idx]}</h1>
+                        <p style="color: {c_muted}; font-size: 14px; text-transform: uppercase; margin-bottom: 5px;">Birincil Teşhis</p>
+                        <h1 style="margin:0; color: {c_text}; font-size: 38px;">{classes[idx]}</h1>
                         <p style="font-size: 20px; color: {box_color}; font-weight: 700; margin-top: 10px;">Güven Skoru: %{confidence*100:.2f}</p>
                     </div>
                 """, unsafe_allow_html=True)
@@ -277,7 +314,6 @@ elif selected == "Performans Raporu":
     loss_placeholder = g2.empty()
     
     bg_color = 'rgba(0,0,0,0)'
-    grid_color = 'rgba(255,255,255,0.05)'
     
     if start_sim:
         epochs = list(range(1, 46))
@@ -286,11 +322,11 @@ elif selected == "Performans Raporu":
         for i in range(1, 46):
             with acc_placeholder:
                 fig = go.Figure().add_trace(go.Scatter(x=epochs[:i], y=acc_vals[:i], mode='lines', fill='tozeroy', name="Accuracy", line=dict(color='#10B981', width=3), fillcolor='rgba(16, 185, 129, 0.1)'))
-                fig.update_layout(title="Training & Validation Accuracy", paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color="#F8FAFC"), xaxis_title="Epoch", yaxis_title="Accuracy", xaxis=dict(range=[0,45], gridcolor=grid_color), yaxis=dict(range=[0.7, 1], gridcolor=grid_color))
+                fig.update_layout(title="Training & Validation Accuracy", paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color=c_text), xaxis_title="Epoch", yaxis_title="Accuracy", xaxis=dict(range=[0,45], gridcolor=c_grid), yaxis=dict(range=[0.7, 1], gridcolor=c_grid))
                 st.plotly_chart(fig, use_container_width=True)
             with loss_placeholder:
                 fig = go.Figure().add_trace(go.Scatter(x=epochs[:i], y=loss_vals[:i], mode='lines', fill='tozeroy', name="Loss", line=dict(color='#EF4444', width=3), fillcolor='rgba(239, 68, 68, 0.1)'))
-                fig.update_layout(title="Training & Validation Loss", paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color="#F8FAFC"), xaxis_title="Epoch", yaxis_title="Loss", xaxis=dict(range=[0,45], gridcolor=grid_color), yaxis=dict(range=[0, 0.7], gridcolor=grid_color))
+                fig.update_layout(title="Training & Validation Loss", paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color=c_text), xaxis_title="Epoch", yaxis_title="Loss", xaxis=dict(range=[0,45], gridcolor=c_grid), yaxis=dict(range=[0, 0.7], gridcolor=c_grid))
                 st.plotly_chart(fig, use_container_width=True)
             time.sleep(0.02)
     else:
@@ -301,22 +337,21 @@ elif selected == "Performans Raporu":
     
     c_m1, c_m2 = st.columns(2)
     with c_m1:
-        st.markdown("<h4 style='text-align: center; color: #CBD5E1;'>Confusion Matrix (Karmaşıklık Matrisi)</h4>", unsafe_allow_html=True)
+        st.markdown(f"<h4 style='text-align: center; color: {c_muted};'>Confusion Matrix (Karmaşıklık Matrisi)</h4>", unsafe_allow_html=True)
         cm_data = [[1650, 15, 10, 25], [12, 1720, 5, 3], [20, 10, 1680, 40], [15, 5, 10, 1800]]
         fig_cm = go.Figure(data=go.Heatmap(z=cm_data, x=classes, y=classes, colorscale='Teal', text=cm_data, texttemplate="%{text}", showscale=False))
-        fig_cm.update_layout(paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color="#F8FAFC"), xaxis_title="Tahmin Edilen (Predicted)", yaxis_title="Gerçek Sınıf (True)")
+        fig_cm.update_layout(paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color=c_text), xaxis_title="Tahmin Edilen (Predicted)", yaxis_title="Gerçek Sınıf (True)")
         st.plotly_chart(fig_cm, use_container_width=True)
     with c_m2:
-        st.markdown("<h4 style='text-align: center; color: #CBD5E1;'>ROC Curve & AUC (Eğri Altında Kalan Alan)</h4>", unsafe_allow_html=True)
+        st.markdown(f"<h4 style='text-align: center; color: {c_muted};'>ROC Curve & AUC (Eğri Altında Kalan Alan)</h4>", unsafe_allow_html=True)
         fig_roc = go.Figure().add_trace(go.Scatter(x=[0, 0.05, 0.1, 0.2, 1], y=[0, 0.92, 0.95, 0.97, 1], fill='tozeroy', name='Model (AUC=0.97)', line=dict(color="#00F2FE", width=3), fillcolor='rgba(0, 242, 254, 0.1)'))
         fig_roc.add_trace(go.Scatter(x=[0, 1], y=[0, 1], line=dict(dash='dash', color='#64748B'), name="Rastgele Tahmin"))
-        fig_roc.update_layout(paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color="#F8FAFC"), xaxis_title="False Positive Rate", yaxis_title="True Positive Rate", xaxis=dict(gridcolor=grid_color), yaxis=dict(gridcolor=grid_color))
+        fig_roc.update_layout(paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color=c_text), xaxis_title="False Positive Rate", yaxis_title="True Positive Rate", xaxis=dict(gridcolor=c_grid), yaxis=dict(gridcolor=c_grid))
         st.plotly_chart(fig_roc, use_container_width=True)
 
     st.divider()
     
-    # DETAYLI SINIFLANDIRMA RAPORU TABLOSU
-    st.markdown("<h4 style='text-align: center; color: #CBD5E1; margin-bottom: 20px;'>Detaylı Sınıflandırma Metrikleri (Classification Report)</h4>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='text-align: center; color: {c_muted}; margin-bottom: 20px;'>Detaylı Sınıflandırma Metrikleri (Classification Report)</h4>", unsafe_allow_html=True)
     st.markdown("""
         <table class="custom-table">
             <tr>
@@ -355,7 +390,7 @@ elif selected == "Algoritma Analizi":
     
     for i, (title, code, desc) in enumerate(steps, 1):
         with st.expander(f"⚙️ {i}. {title}", expanded=(i==1)):
-            st.markdown(f"<p style='color: #CBD5E1;'>{desc}</p>", unsafe_allow_html=True)
+            st.markdown(f"<p style='color: {c_muted};'>{desc}</p>", unsafe_allow_html=True)
             if "=" in code: 
                 st.code(code, language="python")
             else: 
@@ -375,8 +410,8 @@ elif selected == "Sonuç & Kaynakça":
     ''', unsafe_allow_html=True)
     
     st.markdown("### 📚 Kaynakça")
-    st.markdown('''
-        <ul style="color: #CBD5E1; line-height: 1.8;">
+    st.markdown(f'''
+        <ul style="color: {c_muted}; line-height: 1.8;">
             <li><b>[1] Dataset:</b> Brain Tumor Classification (MRI) Dataset. Kaggle. <a href="https://www.kaggle.com/" style="color: #00F2FE;">Erişim Linki</a></li>
             <li><b>[2] M. Sandler, A. Howard, vd. (2018).</b> "MobileNetV2: Inverted Residuals and Linear Bottlenecks", <i>Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</i>, ss. 4510-4520.</li>
             <li><b>[3] Framework Docs:</b> TensorFlow and Keras Documentation. <a href="https://www.tensorflow.org/" style="color: #00F2FE;">tensorflow.org</a></li>
@@ -386,8 +421,8 @@ elif selected == "Sonuç & Kaynakça":
     ''', unsafe_allow_html=True)
 
 # Footer
-st.markdown("""
-    <div style="text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-        <p style="color: #64748B; font-size: 13px;">v16.0 | BİLM-432 Yapay Zeka ile Sağlık Bilişimi • Vize Projesi</p>
+st.markdown(f"""
+    <div style="text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid {c_border};">
+        <p style="color: {c_muted}; font-size: 13px;">v16.0 | BİLM-432 Yapay Zeka ile Sağlık Bilişimi • Vize Projesi</p>
     </div>
 """, unsafe_allow_html=True)
