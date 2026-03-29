@@ -12,7 +12,6 @@ import time
 # --- 1. AYARLAR VE MODEL YÜKLEME ---
 st.set_page_config(page_title="Zırhlı Beyin Analiz v16.0", layout="wide", initial_sidebar_state="expanded")
 
-# Simülasyon durumunu aklında tutması için Session State
 if 'sim_done' not in st.session_state:
     st.session_state.sim_done = False
 
@@ -26,7 +25,7 @@ def load_my_model():
     return tf.keras.models.load_model(model_path, compile=False)
 
 classes = ['Glioma', 'Healthy', 'Meningioma', 'Pituitary']
-# model = load_my_model() # Geliştirme aşamasında modeli yüklemek için yorum satırını kaldırın
+# model = load_my_model()
 
 # --- 2. SİSTEM TEMASINA DUYARLI & MODERN CSS ---
 st.markdown("""
@@ -72,11 +71,12 @@ st.markdown("""
 
     .custom-table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 0 auto; background: var(--secondary-background-color); border-radius: 16px; overflow: hidden; border: 1px solid rgba(128,128,128,0.15); transition: all 0.3s ease; }
     .custom-table th { background: rgba(128,128,128,0.05); color: var(--text-color); opacity: 0.9; padding: 18px; text-align: center; font-weight: 700; border-bottom: 1px solid rgba(128,128,128,0.15); }
-    .custom-table td { color: var(--text-color); padding: 15px; text-align: center; border-bottom: 1px solid rgba(128,128,128,0.08); font-weight: 500; transition: all 0.3s ease;}
+    .custom-table td { color: var(--text-color); padding: 15px; text-align: center; border-bottom: 1px solid rgba(128,128,128,0.08); font-weight: 500; transition: background-color 0.3s ease;}
     .custom-table tr:hover td { background: rgba(0, 242, 254, 0.05); }
     .custom-table tr:last-child td { border-bottom: none; }
     
-    .sim-value { font-family: monospace; font-size: 16px; color: #00F2FE; font-weight: bold; }
+    /* Naif Geçişler İçin CSS */
+    .sim-value { font-family: monospace; font-size: 16px; color: #00F2FE; font-weight: bold; transition: color 0.5s ease-out; }
     
     .nav-link {
         display: flex; align-items: center; gap: 15px; padding: 14px 18px; margin: 12px 0;
@@ -152,7 +152,7 @@ with c1:
         <div class="class-box" style="border-left-color: #EF4444;">
             <span class="criteria-badge">🎯 Kriter 1, 2, 3: Problem, Amaç ve Önem</span>
             <h4>Problem, Amaç ve Önemi</h4>
-            <p><b>Problem Tanımı:</b> Beyin tümörlerinin teşhisinde radyologların manuel MRI analizi yapması zaman alıcıdır ve gözden kaçan dokular sebebiyle hata riski barındır.<br><br>
+            <p><b>Problem Tanımı:</b> Beyin tümörlerinin teşhisinde radyologların manuel MRI analizi yapması zaman alıcıdır ve gözden kaçan dokular sebebiyle hata riski barındırır.<br><br>
             <b>Projenin Amacı:</b> Derin öğrenme tabanlı, yüksek doğrulukla çalışan objektif bir karar destek sistemi (KDS) geliştirmektir.<br><br>
             <b>Klinik Önemi:</b> Bu çalışma, erken teşhis sürecini hızlandırarak hastaların sağkalım oranını artırabilir ve doktorların iş yükünü hafifletebilir.</p>
         </div>
@@ -275,20 +275,18 @@ with col1:
 
 st.write("---")
 
-# Bilgi mesajı ve gizli grafik tutucuları
 info_placeholder = st.empty()
 
 if not start_sim and not st.session_state.sim_done:
     info_placeholder.markdown("""
         <div style='background-color: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; padding: 30px; text-align: center;'>
             <h4 style='margin-bottom: 10px;'>📊 Grafikler Gizli</h4>
-            <p style='opacity: 0.8; margin: 0;'>Modelin eğitim sürecini, hata matrisinin oluşumunu ve ROC eğrisinin gelişimini adım adım eşzamanlı izlemek için yukarıdaki <b>"Eğitimi Simüle Et"</b> butonuna tıklayın.</p>
+            <p style='opacity: 0.8; margin: 0;'>Modelin eğitim sürecini, hata matrisinin oluşumunu ve ROC eğrisinin gelişimini adım adım pürüzsüzce izlemek için yukarıdaki <b>"Eğitimi Simüle Et"</b> butonuna tıklayın.</p>
         </div>
     """, unsafe_allow_html=True)
 
-# Sadece butona basıldığında veya daha önce simülasyon bittiğinde panelleri yarat
 if start_sim or st.session_state.sim_done:
-    info_placeholder.empty() # Bilgi mesajını temizle
+    info_placeholder.empty() 
     st.markdown('<span class="criteria-badge criteria-badge-success">📈 Kriter 15, 16: Grafik Kullanımı ve Kalitesi</span>', unsafe_allow_html=True)
     
     g1, g2 = st.columns(2, gap="large")
@@ -305,7 +303,6 @@ if start_sim or st.session_state.sim_done:
     
     bg_color = 'rgba(0,0,0,0)'
     
-    # Animasyon Uç Değerleri
     final_cm = np.array([[1650, 15, 10, 25], [12, 1720, 5, 3], [20, 10, 1680, 40], [15, 5, 10, 1800]])
     start_cm = np.full((4, 4), 425) 
 
@@ -320,18 +317,19 @@ if start_sim or st.session_state.sim_done:
         
         with acc_placeholder:
             fig = go.Figure().add_trace(go.Scatter(x=list(range(1, epoch+1)), y=acc_vals, mode='lines', fill='tozeroy', name="Accuracy", line=dict(color='#10B981', width=3), fillcolor='rgba(16, 185, 129, 0.1)'))
-            fig.update_layout(title="Training & Validation Accuracy", paper_bgcolor=bg_color, plot_bgcolor=bg_color, xaxis_title="Epoch", yaxis_title="Accuracy", xaxis=dict(range=[0,45]), yaxis=dict(range=[0.7, 1]), height=350, margin=dict(t=40))
+            # uirevision='constant' büyüsü Plotly'nin arka planı baştan çizmesini engelleyip animasyonu yağ gibi yapar
+            fig.update_layout(title="Training & Validation Accuracy", paper_bgcolor=bg_color, plot_bgcolor=bg_color, xaxis_title="Epoch", yaxis_title="Accuracy", xaxis=dict(range=[0,45]), yaxis=dict(range=[0.7, 1]), height=350, margin=dict(t=40), uirevision='constant')
             st.plotly_chart(fig, use_container_width=True, theme="streamlit")
             
         with loss_placeholder:
             fig = go.Figure().add_trace(go.Scatter(x=list(range(1, epoch+1)), y=loss_vals, mode='lines', fill='tozeroy', name="Loss", line=dict(color='#EF4444', width=3), fillcolor='rgba(239, 68, 68, 0.1)'))
-            fig.update_layout(title="Training & Validation Loss", paper_bgcolor=bg_color, plot_bgcolor=bg_color, xaxis_title="Epoch", yaxis_title="Loss", xaxis=dict(range=[0,45]), yaxis=dict(range=[0, 0.7]), height=350, margin=dict(t=40))
+            fig.update_layout(title="Training & Validation Loss", paper_bgcolor=bg_color, plot_bgcolor=bg_color, xaxis_title="Epoch", yaxis_title="Loss", xaxis=dict(range=[0,45]), yaxis=dict(range=[0, 0.7]), height=350, margin=dict(t=40), uirevision='constant')
             st.plotly_chart(fig, use_container_width=True, theme="streamlit")
             
         current_cm = np.round(start_cm + (final_cm - start_cm) * progress).astype(int)
         with cm_placeholder:
             fig_cm = go.Figure(data=go.Heatmap(z=current_cm, x=classes, y=classes, colorscale='Teal', text=current_cm, texttemplate="%{text}", showscale=False))
-            fig_cm.update_layout(title="Hata Matrisi (Confusion Matrix)", paper_bgcolor=bg_color, plot_bgcolor=bg_color, xaxis_title="Tahmin Edilen", yaxis_title="Gerçek Sınıf", margin=dict(t=40), height=350)
+            fig_cm.update_layout(title="Hata Matrisi (Confusion Matrix)", paper_bgcolor=bg_color, plot_bgcolor=bg_color, xaxis_title="Tahmin Edilen", yaxis_title="Gerçek Sınıf", margin=dict(t=40), height=350, uirevision='constant')
             st.plotly_chart(fig_cm, use_container_width=True, theme="streamlit")
             
         current_roc_y = start_roc_y + (final_roc_y - start_roc_y) * progress
@@ -339,7 +337,7 @@ if start_sim or st.session_state.sim_done:
         with roc_placeholder:
             fig_roc = go.Figure().add_trace(go.Scatter(x=[0, 0.05, 0.1, 0.2, 1], y=current_roc_y, fill='tozeroy', name=f'Model (AUC={current_auc:.2f})', line=dict(color="#00F2FE", width=3), fillcolor='rgba(0, 242, 254, 0.1)'))
             fig_roc.add_trace(go.Scatter(x=[0, 1], y=[0, 1], line=dict(dash='dash', color='#64748B'), name="Rastgele (0.50)"))
-            fig_roc.update_layout(title=f"ROC Eğrisi (AUC: {current_auc:.2f})", paper_bgcolor=bg_color, plot_bgcolor=bg_color, xaxis_title="False Positive Rate", yaxis_title="True Positive Rate", margin=dict(t=40), height=350)
+            fig_roc.update_layout(title=f"ROC Eğrisi (AUC: {current_auc:.2f})", paper_bgcolor=bg_color, plot_bgcolor=bg_color, xaxis_title="False Positive Rate", yaxis_title="True Positive Rate", margin=dict(t=40), height=350, uirevision='constant')
             st.plotly_chart(fig_roc, use_container_width=True, theme="streamlit")
             
         f_g = 0.25 + (0.93 - 0.25) * progress
@@ -363,9 +361,13 @@ if start_sim or st.session_state.sim_done:
 
     if start_sim:
         st.session_state.sim_done = False
-        for i in range(1, 46):
+        # Saniyede saniye ağır ağır ilerlemek (donmak) yerine 3'er kare atlayarak yumuşak ve naif akış sağlarız
+        sim_steps = list(range(3, 46, 3)) 
+        if 45 not in sim_steps: sim_steps.append(45)
+        
+        for i in sim_steps:
             render_dashboards(epoch=i, max_epoch=45, simulate=True)
-            time.sleep(0.015) # Profesyonel ve akıcı bir hız
+            time.sleep(0.01) # Takılmayı sıfıra indirmek için bekleme süresini minimize ettik
         st.session_state.sim_done = True
     else:
         render_dashboards(epoch=45, max_epoch=45, simulate=False)
@@ -438,7 +440,6 @@ components.html(
         
         if(links.length === 0 || sections.length === 0) return;
 
-        // Ekranda kaydırma yapıldıkça hangi bölüme geldiğini tarayan gözlemci
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -456,18 +457,22 @@ components.html(
 
         sections.forEach(sec => observer.observe(sec));
         
-        // Sayfa en baştayken (Y scroll değeri 0'a yakınken) Ana Sayfa'nın parlamasını sağla
+        // Ana Sayfa Parlaması Garantisi
         doc.addEventListener('scroll', () => {
-            if(doc.documentElement.scrollTop < 50) {
+            if(doc.documentElement.scrollTop < 100) {
                 links.forEach(link => link.classList.remove('active-glow'));
-                doc.getElementById('link-ana-sayfa').classList.add('active-glow');
+                const homeLink = doc.getElementById('link-ana-sayfa');
+                if(homeLink) homeLink.classList.add('active-glow');
             }
         });
         
         // İlk açılışta hemen kontrol et
-        if(doc.documentElement.scrollTop < 50) {
-            doc.getElementById('link-ana-sayfa').classList.add('active-glow');
-        }
+        setTimeout(() => {
+            if(doc.documentElement.scrollTop < 100) {
+                const homeLink = doc.getElementById('link-ana-sayfa');
+                if(homeLink) homeLink.classList.add('active-glow');
+            }
+        }, 500);
     }
 
     const interval = setInterval(() => {
