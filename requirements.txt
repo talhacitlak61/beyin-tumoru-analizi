@@ -5,3 +5,4 @@ Pillow
 plotly
 pandas
 gdown
+streamlit-option_menu
