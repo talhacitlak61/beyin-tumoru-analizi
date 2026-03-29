@@ -1,8 +1,8 @@
-streamlit==1.32.0
-tensorflow==2.15.0
-numpy<2.0.0
-Pillow
-plotly
-pandas
+tensorflow
+streamlit
+streamlit-option-menu
+opencv-python-headless
+numpy
+pillow
+matplotlib
 gdown
-streamlit-option_menu
