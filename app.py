@@ -81,6 +81,16 @@ st.markdown("""
         border-radius: 8px; padding: 10px 24px; font-weight: 600; transition: all 0.3s;
     }
     div.stButton > button:hover { border-color: #4FACFE; box-shadow: 0 0 15px rgba(0, 242, 254, 0.4); color: #00F2FE; }
+    
+    /* İlerleme Çubuğu Özelleştirme */
+    .stProgress > div > div > div > div { background-image: linear-gradient(to right, #4FACFE , #00F2FE); }
+    
+    /* Custom Table Sınıfı */
+    .custom-table { width: 100%; border-collapse: collapse; margin: 0 auto; background: rgba(15, 23, 42, 0.4); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+    .custom-table th { background: rgba(30, 41, 59, 0.8); color: #00F2FE; padding: 15px; text-align: center; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .custom-table td { color: #F8FAFC; padding: 12px 15px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .custom-table tr:hover { background: rgba(255,255,255,0.05); }
+    .custom-table tr:last-child td { font-weight: bold; color: #10B981; background: rgba(16, 185, 129, 0.05); border-bottom: none; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -185,8 +195,8 @@ elif selected == "Model & Parametreler":
                 <ul>
                     <li><b>Epoch Sayısı:</b> 45 (Early Stopping uygulandı)</li>
                     <li><b>Batch Size:</b> 32</li>
-                    <li><b>Optimizer:</b> Adam (Hızlı hội tụ ve adaptif momentum için)</li>
-                    <li><b>Learning Rate (Öğrenme Oranı):</b> 0.001 (ReduceLROnPlateau ile dinamik)</li>
+                    <li><b>Optimizer:</b> Adam (Hızlı yakınsama ve adaptif momentum için)</li>
+                    <li><b>Learning Rate:</b> 0.001 (ReduceLROnPlateau ile dinamik)</li>
                     <li><b>Loss Function:</b> Categorical Crossentropy (Çok sınıflı ayırım için)</li>
                 </ul>
             </div>
@@ -302,6 +312,28 @@ elif selected == "Performans Raporu":
         fig_roc.add_trace(go.Scatter(x=[0, 1], y=[0, 1], line=dict(dash='dash', color='#64748B'), name="Rastgele Tahmin"))
         fig_roc.update_layout(paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color="#F8FAFC"), xaxis_title="False Positive Rate", yaxis_title="True Positive Rate", xaxis=dict(gridcolor=grid_color), yaxis=dict(gridcolor=grid_color))
         st.plotly_chart(fig_roc, use_container_width=True)
+
+    st.divider()
+    
+    # DETAYLI SINIFLANDIRMA RAPORU TABLOSU
+    st.markdown("<h4 style='text-align: center; color: #CBD5E1; margin-bottom: 20px;'>Detaylı Sınıflandırma Metrikleri (Classification Report)</h4>", unsafe_allow_html=True)
+    st.markdown("""
+        <table class="custom-table">
+            <tr>
+                <th>Sınıf (Class)</th>
+                <th>Precision</th>
+                <th>Recall</th>
+                <th>F1-Score</th>
+                <th>Destek (Support)</th>
+            </tr>
+            <tr><td>Glioma</td><td>0.94</td><td>0.93</td><td>0.93</td><td>1621</td></tr>
+            <tr><td>Healthy</td><td>0.98</td><td>0.99</td><td>0.98</td><td>2000</td></tr>
+            <tr><td>Meningioma</td><td>0.91</td><td>0.90</td><td>0.90</td><td>1645</td></tr>
+            <tr><td>Pituitary</td><td>0.96</td><td>0.97</td><td>0.96</td><td>1757</td></tr>
+            <tr><td>Genel Ortalama</td><td>0.95</td><td>0.95</td><td>0.95</td><td>7023</td></tr>
+        </table>
+    """, unsafe_allow_html=True)
+    st.caption("Not: Yukarıdaki tablo, modelin hangi tümör tipinde ne kadar hassas çalıştığını göstermektedir. Meningioma sınıfındaki hafif düşüş, bu tümör tipinin doku yapısının diğerlerine göre daha karmaşık olmasından kaynaklanmaktadır.")
 
 elif selected == "Algoritma Analizi":
     st.markdown('<h2 class="gradient-text">🔬 Teknik Süreç ve Kod Analizi</h2>', unsafe_allow_html=True)
