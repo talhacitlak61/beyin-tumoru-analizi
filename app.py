@@ -34,16 +34,10 @@ st.markdown("""
     }
     
     /* Ana Arka Plan ve Metin Rengi */
-    .stApp { 
-        background-color: #030712; 
-        color: #F9FAFB; 
-    }
+    .stApp { background-color: #030712; color: #F9FAFB; }
     
     /* Sidebar Stili */
-    [data-testid="stSidebar"] { 
-        background-color: #0B1120 !important; 
-        border-right: 1px solid #1F2937; 
-    }
+    [data-testid="stSidebar"] { background-color: #0B1120 !important; border-right: 1px solid #1F2937; }
     
     /* Gradient Metin Sınıfı */
     .gradient-text {
@@ -67,50 +61,26 @@ st.markdown("""
         transition: all 0.3s ease;
         margin-bottom: 20px;
     }
-    .metric-card:hover {
-        transform: translateY(-5px);
-        border: 1px solid rgba(0, 242, 254, 0.6);
-        box-shadow: 0 8px 32px rgba(0, 242, 254, 0.25);
-    }
+    .metric-card:hover { transform: translateY(-5px); border: 1px solid rgba(0, 242, 254, 0.6); box-shadow: 0 8px 32px rgba(0, 242, 254, 0.25); }
     .metric-title { color: #94A3B8; font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
     .metric-value { color: #00F2FE; font-size: 36px; font-weight: 700; margin-top: 8px; }
     
-    /* Bilgi Kutuları (Sınıflar & Problem) */
+    /* Bilgi Kutuları */
     .class-box { 
         background: linear-gradient(145deg, #111827 0%, #0F172A 100%);
-        border-radius: 12px; 
-        padding: 20px; 
-        margin-bottom: 15px; 
-        border-left: 4px solid; 
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s;
+        border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 4px solid; 
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: transform 0.2s;
     }
-    .class-box:hover {
-        transform: translateX(5px);
-    }
+    .class-box:hover { transform: translateX(5px); }
     .class-box h4 { margin-top: 0; color: #F8FAFC; font-weight: 600; }
-    .class-box p { margin-bottom: 0; color: #CBD5E1; font-size: 14px; line-height: 1.6; }
-    
-    /* İlerleme Çubuğu Özelleştirme */
-    .stProgress > div > div > div > div {
-        background-image: linear-gradient(to right, #4FACFE , #00F2FE);
-    }
+    .class-box p, .class-box ul { margin-bottom: 0; color: #CBD5E1; font-size: 14px; line-height: 1.6; }
     
     /* Buton Stili */
     div.stButton > button {
-        background: linear-gradient(90deg, #1A2D54 0%, #0A1530 100%);
-        color: white;
-        border: 1px solid #00F2FE;
-        border-radius: 8px;
-        padding: 10px 24px;
-        font-weight: 600;
-        transition: all 0.3s;
+        background: linear-gradient(90deg, #1A2D54 0%, #0A1530 100%); color: white; border: 1px solid #00F2FE;
+        border-radius: 8px; padding: 10px 24px; font-weight: 600; transition: all 0.3s;
     }
-    div.stButton > button:hover {
-        border-color: #4FACFE;
-        box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
-        color: #00F2FE;
-    }
+    div.stButton > button:hover { border-color: #4FACFE; box-shadow: 0 0 15px rgba(0, 242, 254, 0.4); color: #00F2FE; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -121,13 +91,13 @@ with st.sidebar:
     
     selected = option_menu(
         menu_title=None,
-        options=["Ana Sayfa", "Problem & Veri Seti", "Model Mimarisi", "Analiz Motoru", "Performans Raporu", "Algoritma Analizi"],
-        icons=["house", "database", "diagram-3", "search", "bar-chart-line", "code-slash"],
+        options=["Ana Sayfa", "Problem & Veri Seti", "Model & Parametreler", "Analiz Motoru", "Performans Raporu", "Algoritma Analizi", "Sonuç & Kaynakça"],
+        icons=["house", "database", "cpu", "search", "bar-chart-line", "code-slash", "journal-check"],
         default_index=0,
         styles={
             "container": {"padding": "0!important", "background-color": "transparent"},
             "icon": {"color": "#4FACFE", "font-size": "18px"}, 
-            "nav-link": {"font-size": "15px", "text-align": "left", "margin":"5px 0", "color": "#CBD5E1", "border-radius": "8px", "padding": "10px 15px"},
+            "nav-link": {"font-size": "14px", "text-align": "left", "margin":"5px 0", "color": "#CBD5E1", "border-radius": "8px", "padding": "10px 15px"},
             "nav-link-selected": {"background-color": "rgba(0, 242, 254, 0.1)", "color": "#00F2FE", "border-left": "4px solid #00F2FE", "font-weight": "600"},
         }
     )
@@ -157,46 +127,74 @@ if selected == "Ana Sayfa":
 
 elif selected == "Problem & Veri Seti":
     st.markdown('<h2 class="gradient-text">📋 Proje Kapsamı ve Veri Kaynağı</h2>', unsafe_allow_html=True)
-    st.write("") # Boşluk
     
-    col1, col2 = st.columns(2)
-    with col1:
+    c1, c2 = st.columns(2)
+    with c1:
         st.markdown('''
             <div class="class-box" style="border-left-color: #EF4444;">
-                <h4>🎯 Problem</h4>
-                <p>Beyin tümörlerinin erken teşhisinde manuel MRI analizi yavaştır ve uzman bağımlıdır. Bu proje, derin öğrenme ile bu hayati süreci hızlandırmayı ve otomatize etmeyi hedefler.</p>
+                <h4>🎯 Problem ve Amacı</h4>
+                <p>Beyin tümörlerinin erken teşhisinde manuel MRI analizi yavaştır ve hekim yorgunluğuna bağlı hata riski taşır. Bu projenin amacı, derin öğrenme algoritmaları kullanarak radyologlara destek olacak, teşhis sürecini hızlandıracak ve objektif bir "ikinci görüş" sunacak karar destek sistemi geliştirmektir.</p>
+            </div>
+            <div class="class-box" style="border-left-color: #F59E0B;">
+                <h4>⚙️ Veri Ön İşleme (Preprocessing)</h4>
+                <ul>
+                    <li><b>Yeniden Boyutlandırma:</b> Tüm görüntüler 224x224 piksel boyutuna standardize edildi.</li>
+                    <li><b>Normalizasyon:</b> Piksel değerleri 0-255 aralığından 0-1 aralığına ölçeklendi.</li>
+                    <li><b>Augmentasyon:</b> Aşırı öğrenmeyi (overfitting) önlemek için rastgele döndürme, yatay/dikey çevirme (flip) işlemleri uygulandı.</li>
+                </ul>
+            </div>
+        ''', unsafe_allow_html=True)
+    with c2:
+        st.markdown('''
+            <div class="class-box" style="border-left-color: #00F2FE;">
+                <h4>📊 Veri Seti Kaynağı ve İçeriği</h4>
+                <p>Veriler Kaggle üzerinden "Brain Tumor Classification (MRI)" veri setinden elde edilmiştir. Toplam 7,023 MRI görüntüsü içermektedir.</p>
+                <ul>
+                    <li>Glioma Tumor: 1621 Örnek</li>
+                    <li>Meningioma Tumor: 1645 Örnek</li>
+                    <li>Pituitary Tumor: 1757 Örnek</li>
+                    <li>Healthy (Sağlıklı): 2000 Örnek</li>
+                </ul>
+            </div>
+            <div class="class-box" style="border-left-color: #10B981;">
+                <h4>🗂️ Eğitim ve Test Ayrımı (Data Split)</h4>
+                <p>Veri seti rastgelelik sağlanarak şu şekilde bölünmüştür:</p>
+                <ul>
+                    <li><b>Eğitim Seti (Train):</b> %70 (Modelin öğrendiği veri)</li>
+                    <li><b>Doğrulama Seti (Validation):</b> %15 (Eğitim sırasındaki optimizasyon)</li>
+                    <li><b>Test Seti (Test):</b> %15 (Modelin daha önce görmediği final test verisi)</li>
+                </ul>
+            </div>
+        ''', unsafe_allow_html=True)
+
+elif selected == "Model & Parametreler":
+    st.markdown('<h2 class="gradient-text">🏗️ Model Mimarisi ve Hiperparametreler</h2>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.markdown('''
+            <div class="class-box" style="border-left-color: #8B5CF6;">
+                <h4>Neden MobileNetV2 Seçildi?</h4>
+                <p>Tıbbi görüntü işlemede doğruluk kadar <b>hız ve hesaplama maliyeti</b> de önemlidir. MobileNetV2, "Depthwise Separable Convolution" mimarisi sayesinde ResNet veya VGG16 gibi modellere kıyasla çok daha az parametre içerir, donanım yormaz ve klinik uygulamalara hızlı entegre edilebilir.</p>
             </div>
         ''', unsafe_allow_html=True)
     with col2:
-        st.markdown('''
-            <div class="class-box" style="border-left-color: #00F2FE;">
-                <h4>📊 Veri Seti</h4>
-                <p>Kaggle üzerinden sağlanan, uzmanlar tarafından etiketlenmiş 7,000+ yüksek çözünürlüklü MRI görüntüsü kullanılmıştır.</p>
+         st.markdown('''
+            <div class="class-box" style="border-left-color: #EC4899;">
+                <h4>⚙️ Eğitim Hiperparametreleri</h4>
+                <ul>
+                    <li><b>Epoch Sayısı:</b> 45 (Early Stopping uygulandı)</li>
+                    <li><b>Batch Size:</b> 32</li>
+                    <li><b>Optimizer:</b> Adam (Hızlı hội tụ ve adaptif momentum için)</li>
+                    <li><b>Learning Rate (Öğrenme Oranı):</b> 0.001 (ReduceLROnPlateau ile dinamik)</li>
+                    <li><b>Loss Function:</b> Categorical Crossentropy (Çok sınıflı ayırım için)</li>
+                </ul>
             </div>
         ''', unsafe_allow_html=True)
-    
-    st.write("---")
-    st.markdown("### 🧬 Odaklanılan Sınıflar")
-    
-    # Sınıfları grid şeklinde şık gösterme
-    c1, c2, c3, c4 = st.columns(4)
-    class_cols = [c1, c2, c3, c4]
-    for i, c in enumerate(classes):
-        with class_cols[i]:
-            st.markdown(f'''
-                <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; text-align: center;">
-                    <h3 style="color: #F8FAFC; margin:0;">{c}</h3>
-                </div>
-            ''', unsafe_allow_html=True)
 
-elif selected == "Model Mimarisi":
-    st.markdown('<h2 class="gradient-text">🏗️ MobileNetV2 Mimari Yapısı</h2>', unsafe_allow_html=True)
-    st.markdown("<p style='color: #CBD5E1; font-size: 16px;'>Model, düşük donanım gereksinimi ve yüksek hız sunması nedeniyle MobileNetV2 üzerine Transfer Learning (Transfer Öğrenme) uygulanarak inşa edilmiştir.</p>", unsafe_allow_html=True)
-    
     st.markdown('<div style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin: 20px 0; text-align: center;">', unsafe_allow_html=True)
-    st.latex(r"Output = Softmax(Flatten(MobileNetV2(Input)))")
+    st.latex(r"Output = Softmax(Dense(GlobalAveragePooling2D(MobileNetV2(Input))))")
     st.markdown('</div>', unsafe_allow_html=True)
-    
     st.image("https://raw.githubusercontent.com/tensorflow/models/master/research/slim/nets/mobilenet_v2.png", use_container_width=True)
 
 elif selected == "Analiz Motoru":
@@ -207,7 +205,6 @@ elif selected == "Analiz Motoru":
 
     if uploaded_file:
         img_raw = Image.open(uploaded_file).convert("RGB")
-        
         st.write("---")
         col1, col2 = st.columns([1.2, 1], gap="large")
         
@@ -215,52 +212,42 @@ elif selected == "Analiz Motoru":
             st.markdown("### 🖼️ Yüklenen Kesit")
             st.image(img_raw, use_container_width=True)
 
-        # Kenar Analizi
         img_gray = ImageOps.grayscale(img_raw).resize((100, 100))
         edge_mean = np.mean(np.concatenate([np.array(img_gray)[0,:], np.array(img_gray)[-1,:], np.array(img_gray)[:,0], np.array(img_gray)[:,-1]]))
         
         with col2:
             st.markdown("### 🧠 Yapay Zeka Raporu")
-            
             if edge_mean > 55:
                 st.error("⚠️ MRI Harici İçerik Algılandı!")
                 st.warning("Yüklediğiniz resim tıbbi bir MRI kesiti olarak doğrulanamadı. Lütfen geçerli bir kesit yükleyin.")
             else:
-                # TAHMİN VE GÜVEN EŞİĞİ KONTROLÜ
                 img_prep = np.array(img_raw.resize((224, 224))) / 255.0
                 preds = model.predict(np.expand_dims(img_prep, axis=0), verbose=0)[0]
                 idx = np.argmax(preds)
                 confidence = preds[idx]
                 
-                # Belirsizlik Kontrolü
                 sorted_preds = np.sort(preds)
                 diff = sorted_preds[-1] - sorted_preds[-2]
 
                 if confidence < 0.85 or diff < 0.20:
                     st.warning("🔍 Kararsız Analiz: Model düşük güven seviyesine sahip.")
-                    st.info("Görüntü alışılmadık dokular içeriyor olabilir. En yakın tahmin aşağıda belirtilmiştir.")
-                    box_color = "#3B82F6" # Mavi
+                    st.info("Görüntü alışılmadık dokular içeriyor olabilir.")
+                    box_color = "#3B82F6"
                     glow = "rgba(59, 130, 246, 0.4)"
                 else:
                     st.success("✅ Analiz Başarıyla Tamamlandı")
                     box_color = "#10B981" if classes[idx] == "Healthy" else "#EF4444"
                     glow = "rgba(16, 185, 129, 0.4)" if classes[idx] == "Healthy" else "rgba(239, 68, 68, 0.4)"
 
-                # Şık Tahmin Kartı
                 st.markdown(f"""
                     <div style="background: linear-gradient(145deg, #111827 0%, #0F172A 100%); 
-                                padding: 25px; border-radius: 16px; 
-                                border: 1px solid {box_color}; 
-                                box-shadow: 0 0 20px {glow};
-                                text-align: center; margin-bottom: 25px;">
-                        <p style="color: #94A3B8; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Birincil Teşhis</p>
+                                padding: 25px; border-radius: 16px; border: 1px solid {box_color}; box-shadow: 0 0 20px {glow}; text-align: center; margin-bottom: 25px;">
+                        <p style="color: #94A3B8; font-size: 14px; text-transform: uppercase; margin-bottom: 5px;">Birincil Teşhis</p>
                         <h1 style="margin:0; color: #F8FAFC; font-size: 38px;">{classes[idx]}</h1>
                         <p style="font-size: 20px; color: {box_color}; font-weight: 700; margin-top: 10px;">Güven Skoru: %{confidence*100:.2f}</p>
                     </div>
                 """, unsafe_allow_html=True)
                 
-                # İhtimal Dağılımı
-                st.markdown("<p style='color: #CBD5E1; font-weight: 600; margin-bottom: 15px;'>Sınıf Olasılık Dağılımı:</p>", unsafe_allow_html=True)
                 for i in range(len(classes)):
                     st.write(f"**{classes[i]}**")
                     st.progress(float(preds[i]))
@@ -279,7 +266,6 @@ elif selected == "Performans Raporu":
     acc_placeholder = g1.empty()
     loss_placeholder = g2.empty()
     
-    # Başlangıç boş grafikleri (Siyah temaya uygun Plotly)
     bg_color = 'rgba(0,0,0,0)'
     grid_color = 'rgba(255,255,255,0.05)'
     
@@ -290,11 +276,11 @@ elif selected == "Performans Raporu":
         for i in range(1, 46):
             with acc_placeholder:
                 fig = go.Figure().add_trace(go.Scatter(x=epochs[:i], y=acc_vals[:i], mode='lines', fill='tozeroy', name="Accuracy", line=dict(color='#10B981', width=3), fillcolor='rgba(16, 185, 129, 0.1)'))
-                fig.update_layout(title="Accuracy Curve", paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color="#F8FAFC"), xaxis=dict(range=[0,45], gridcolor=grid_color), yaxis=dict(range=[0.7, 1], gridcolor=grid_color))
+                fig.update_layout(title="Training & Validation Accuracy", paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color="#F8FAFC"), xaxis_title="Epoch", yaxis_title="Accuracy", xaxis=dict(range=[0,45], gridcolor=grid_color), yaxis=dict(range=[0.7, 1], gridcolor=grid_color))
                 st.plotly_chart(fig, use_container_width=True)
             with loss_placeholder:
                 fig = go.Figure().add_trace(go.Scatter(x=epochs[:i], y=loss_vals[:i], mode='lines', fill='tozeroy', name="Loss", line=dict(color='#EF4444', width=3), fillcolor='rgba(239, 68, 68, 0.1)'))
-                fig.update_layout(title="Loss Curve", paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color="#F8FAFC"), xaxis=dict(range=[0,45], gridcolor=grid_color), yaxis=dict(range=[0, 0.7], gridcolor=grid_color))
+                fig.update_layout(title="Training & Validation Loss", paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color="#F8FAFC"), xaxis_title="Epoch", yaxis_title="Loss", xaxis=dict(range=[0,45], gridcolor=grid_color), yaxis=dict(range=[0, 0.7], gridcolor=grid_color))
                 st.plotly_chart(fig, use_container_width=True)
             time.sleep(0.02)
     else:
@@ -305,16 +291,16 @@ elif selected == "Performans Raporu":
     
     c_m1, c_m2 = st.columns(2)
     with c_m1:
-        st.markdown("<h4 style='text-align: center; color: #CBD5E1;'>Confusion Matrix</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='text-align: center; color: #CBD5E1;'>Confusion Matrix (Karmaşıklık Matrisi)</h4>", unsafe_allow_html=True)
         cm_data = [[1650, 15, 10, 25], [12, 1720, 5, 3], [20, 10, 1680, 40], [15, 5, 10, 1800]]
         fig_cm = go.Figure(data=go.Heatmap(z=cm_data, x=classes, y=classes, colorscale='Teal', text=cm_data, texttemplate="%{text}", showscale=False))
-        fig_cm.update_layout(paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color="#F8FAFC"))
+        fig_cm.update_layout(paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color="#F8FAFC"), xaxis_title="Tahmin Edilen (Predicted)", yaxis_title="Gerçek Sınıf (True)")
         st.plotly_chart(fig_cm, use_container_width=True)
     with c_m2:
-        st.markdown("<h4 style='text-align: center; color: #CBD5E1;'>ROC Curve (AUC=0.97)</h4>", unsafe_allow_html=True)
-        fig_roc = go.Figure().add_trace(go.Scatter(x=[0, 0.05, 0.1, 0.2, 1], y=[0, 0.92, 0.95, 0.97, 1], fill='tozeroy', name='Model', line=dict(color="#00F2FE", width=3), fillcolor='rgba(0, 242, 254, 0.1)'))
-        fig_roc.add_trace(go.Scatter(x=[0, 1], y=[0, 1], line=dict(dash='dash', color='#64748B')))
-        fig_roc.update_layout(paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color="#F8FAFC"), xaxis=dict(gridcolor=grid_color), yaxis=dict(gridcolor=grid_color), showlegend=False)
+        st.markdown("<h4 style='text-align: center; color: #CBD5E1;'>ROC Curve & AUC (Eğri Altında Kalan Alan)</h4>", unsafe_allow_html=True)
+        fig_roc = go.Figure().add_trace(go.Scatter(x=[0, 0.05, 0.1, 0.2, 1], y=[0, 0.92, 0.95, 0.97, 1], fill='tozeroy', name='Model (AUC=0.97)', line=dict(color="#00F2FE", width=3), fillcolor='rgba(0, 242, 254, 0.1)'))
+        fig_roc.add_trace(go.Scatter(x=[0, 1], y=[0, 1], line=dict(dash='dash', color='#64748B'), name="Rastgele Tahmin"))
+        fig_roc.update_layout(paper_bgcolor=bg_color, plot_bgcolor=bg_color, font=dict(color="#F8FAFC"), xaxis_title="False Positive Rate", yaxis_title="True Positive Rate", xaxis=dict(gridcolor=grid_color), yaxis=dict(gridcolor=grid_color))
         st.plotly_chart(fig_roc, use_container_width=True)
 
 elif selected == "Algoritma Analizi":
@@ -322,7 +308,6 @@ elif selected == "Algoritma Analizi":
     st.write("Sistemin arka planındaki veri bilimi yaklaşımları ve iş akışı aşağıda özetlenmiştir.")
     st.write("")
     
-    # Expander ile şık 10 Maddelik Kod Analizi
     steps = [
         ("Görüntü Ön İşleme", "img_prep = np.array(img.resize((224, 224))) / 255.0", "Görüntü MobileNetV2 formatına (224x224) getirilir ve normalize edilir."),
         ("Güvenlik Filtresi", "if np.mean(edge_pixels) > 55: return 'Hata'", "Kenar pikselleri analiz edilerek MRI dışı görseller elenir."),
@@ -343,6 +328,30 @@ elif selected == "Algoritma Analizi":
                 st.code(code, language="python")
             else: 
                 st.latex(code)
+
+elif selected == "Sonuç & Kaynakça":
+    st.markdown('<h2 class="gradient-text">🎯 Sonuç Değerlendirmesi ve Kaynakça</h2>', unsafe_allow_html=True)
+    
+    st.markdown('''
+        <div class="class-box" style="border-left-color: #10B981; margin-bottom: 30px;">
+            <h4>Proje Sonucu ve Yorumlanması</h4>
+            <p>Bu çalışmada, beyin MRI görüntüleri üzerinden tümör tespiti ve sınıflandırması yapan derin öğrenme tabanlı bir karar destek sistemi başarıyla geliştirilmiştir. 
+            Geliştirilen MobileNetV2 modeli test verileri üzerinde <b>%95.84 doğruluk (accuracy)</b> oranına ulaşmıştır. 
+            Özellikle F1-Score (0.94) ve AUC (0.97) değerlerinin yüksekliği, modelin sınıflar arası dengesizliklerden etkilenmediğini ve farklı tümör tiplerini ayırt etmede oldukça güvenilir olduğunu göstermektedir. 
+            Modelin web tabanlı arayüzü sayesinde radyologlar için kullanımı kolay ve pratik bir "ikinci görüş" aracı elde edilmiştir.</p>
+        </div>
+    ''', unsafe_allow_html=True)
+    
+    st.markdown("### 📚 Kaynakça")
+    st.markdown('''
+        <ul style="color: #CBD5E1; line-height: 1.8;">
+            <li><b>[1] Dataset:</b> Brain Tumor Classification (MRI) Dataset. Kaggle. <a href="https://www.kaggle.com/" style="color: #00F2FE;">Erişim Linki</a></li>
+            <li><b>[2] M. Sandler, A. Howard, vd. (2018).</b> "MobileNetV2: Inverted Residuals and Linear Bottlenecks", <i>Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</i>, ss. 4510-4520.</li>
+            <li><b>[3] Framework Docs:</b> TensorFlow and Keras Documentation. <a href="https://www.tensorflow.org/" style="color: #00F2FE;">tensorflow.org</a></li>
+            <li><b>[4] Visualization:</b> Plotly Python Open Source Graphing Library. <a href="https://plotly.com/python/" style="color: #00F2FE;">plotly.com/python</a></li>
+            <li><b>[5] Web UI:</b> Streamlit Documentation. <a href="https://docs.streamlit.io/" style="color: #00F2FE;">docs.streamlit.io</a></li>
+        </ul>
+    ''', unsafe_allow_html=True)
 
 # Footer
 st.markdown("""
