@@ -6,3 +6,4 @@ plotly
 pandas
 gdown
 streamlit-option_menu
+pip install streamlit-option_menu
