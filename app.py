@@ -25,7 +25,7 @@ def load_my_model():
     return tf.keras.models.load_model(model_path, compile=False)
 
 classes = ['Glioma', 'Healthy', 'Meningioma', 'Pituitary']
- model = load_my_model()
+model = load_my_model()
 
 # --- 2. SİSTEM TEMASINA DUYARLI & MODERN CSS ---
 st.markdown("""
